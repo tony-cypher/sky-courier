@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Sky Courier — start.ng</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <!-- Background & World Canvas -->
+      <canvas id="game-canvas"></canvas>
+
+      <!-- start.ng Player Profile Card (Mandatory Rule) -->
+      <div class="startng-card" id="player-card" hidden>
+        <img id="player-face" alt="Pilot Face" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'></svg>" />
+        <div>
+          <b id="player-name">Loading...</b>
+          <span id="player-account">@guest</span>
+        </div>
+        <button id="player-sign-in" type="button" hidden>Sign in</button>
+      </div>
+
+      <!-- Top Right Controls (Sound & Leaderboard) -->
+      <div class="top-actions">
+        <button id="btn-leaderboard" class="icon-btn" type="button" title="Leaderboard">
+          🏆 <span>Board</span>
+        </button>
+        <button id="btn-sound" class="icon-btn" type="button" title="Toggle Sound">
+          🔊 <span>Sound</span>
+        </button>
+      </div>
+
+      <!-- HUD Top Bar -->
+      <div class="hud-container" id="hud-container" hidden>
+        <div class="hud-panel">
+          <div class="hud-item">
+            <span class="hud-label">Distance</span>
+            <span class="hud-value" id="hud-distance">0m</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Delivered</span>
+            <span class="hud-value" id="hud-parcels">0</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Cargo</span>
+            <span class="hud-value" id="hud-carried">0/3</span>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Coins</span>
+            <span class="hud-value" id="hud-coins">0</span>
+          </div>
+        </div>
+
+        <div class="hud-panel">
+          <div class="hud-bars">
+            <div class="bar-wrapper">
+              <span>HULL</span>
+              <div class="bar-track">
+                <div class="bar-fill hull" id="hud-hull-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+            <div class="bar-wrapper">
+              <span>TURBO</span>
+              <div class="bar-track">
+                <div class="bar-fill fuel" id="hud-fuel-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Touch Controls -->
+      <div class="touch-controls" id="touch-controls">
+        <button class="touch-btn" id="touch-thrust" aria-label="Thrust Up">▲</button>
+        <button class="touch-btn" id="touch-boost" aria-label="Turbo Boost">⚡</button>
+      </div>
+
+      <!-- Start Overlay Screen -->
+      <div class="overlay-screen" id="start-overlay">
+        <div class="card-dialog">
+          <span class="title-badge">start.ng arcade</span>
+          <h1 class="game-title">Sky <mark>Courier</mark></h1>
+          <p class="subtitle">
+            Take to the skies in your custom jet-glider! Collect floating airmail parcels and swoop into Sky Post drop hubs across the floating skylines.
+          </p>
+
+          <div class="instructions-grid">
+            <div class="instruction-item">
+              <div class="icon">📦</div>
+              <h4>Catch Parcels</h4>
+              <p>Grab parachute mailbags floating in the air stream.</p>
+            </div>
+            <div class="instruction-item">
+              <div class="icon">🏰</div>
+              <h4>Deliver to Hubs</h4>
+              <p>Fly through glowing Sky Post stations to deliver & repair!</p>
+            </div>
+            <div class="instruction-item">
+              <div class="icon">⚡</div>
+              <h4>Dodge Hazards</h4>
+              <p>Evade rogue steam drones and crackling storm clouds.</p>
+            </div>
+          </div>
+
+          <div class="controls-hint">
+            Fly up: <kbd>SPACE</kbd> / <kbd>↑</kbd> / <kbd>W</kbd> or <kbd>Tap</kbd> &nbsp;|&nbsp; Turbo: <kbd>→</kbd> / <kbd>Shift</kbd>
+          </div>
+
+          <button class="btn btn-primary" id="btn-start-run" type="button">
+            Take Flight ➔
+          </button>
+        </div>
+      </div>
+
+      <!-- Game Over Modal -->
+      <div class="overlay-screen" id="gameover-modal" hidden>
+        <div class="card-dialog">
+          <span class="title-badge">Flight Log</span>
+          <h1 class="game-title">Run <mark>Finished</mark></h1>
+
+          <div class="stats-summary">
+            <div class="stat-box">
+              <span class="num" id="go-distance">0m</span>
+              <span class="desc">Distance Flown</span>
+            </div>
+            <div class="stat-box">
+              <span class="num" id="go-parcels">0</span>
+              <span class="desc">Parcels Delivered</span>
+            </div>
+            <div class="stat-box">
+              <span class="num" id="go-coins">0</span>
+              <span class="desc">Coins Gathered</span>
+            </div>
+          </div>
+
+          <div class="save-status-box" id="go-save-status">
+            Connecting to start.ng...
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-primary" id="btn-restart-run" type="button">
+              Fly Again
+            </button>
+            <button class="btn btn-ghost" id="btn-modal-board" type="button">
+              Leaderboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Modal -->
+      <div class="overlay-screen" id="leaderboard-modal" hidden>
+        <div class="card-dialog">
+          <span class="title-badge">Global Rankings</span>
+          <h1 class="game-title">Top <mark>Pilots</mark></h1>
+
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Pilot</th>
+                <th>Distance</th>
+                <th>Parcels</th>
+                <th>Coins</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-body">
+              <tr>
+                <td colspan="5" style="text-align: center; opacity: 0.6; padding: 20px;">
+                  Loading leaderboard...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <button class="btn btn-ghost" id="btn-close-leaderboard" type="button">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts (Relative paths) -->
+    <script src="./startng-client.js"></script>
+    <script src="./character-renderer.js"></script>
+    <script src="./audio.js"></script>
+    <script src="./game.js"></script>
+
+    <script>
+      window.addEventListener('DOMContentLoaded', async () => {
+        const game = new SkyCourierGame();
+        game.init();
+
+        // Initialize start.ng player profile
+        const profile = await window.startNgClient.init();
+        await game.setProfile(profile);
+
+        // Buttons
+        document.getElementById('btn-start-run').addEventListener('click', () => {
+          game.startRun();
+        });
+
+        document.getElementById('btn-restart-run').addEventListener('click', () => {
+          game.startRun();
+        });
+
+        // Sound toggle
+        const soundBtn = document.getElementById('btn-sound');
+        soundBtn.addEventListener('click', () => {
+          const isMuted = window.soundEngine.toggleMute();
+          soundBtn.innerHTML = isMuted ? '🔇 <span>Muted</span>' : '🔊 <span>Sound</span>';
+        });
+
+        // Leaderboard modal logic
+        const boardModal = document.getElementById('leaderboard-modal');
+        const boardBody = document.getElementById('leaderboard-body');
+
+        async function openLeaderboard() {
+          boardModal.hidden = false;
+          boardBody.innerHTML = '<tr><td colspan="5" style="text-align: center; opacity: 0.6; padding: 20px;">Loading flight records...</td></tr>';
+
+          try {
+            const entries = await window.startNgClient.getLeaderboard(10);
+            if (!entries || entries.length === 0) {
+              boardBody.innerHTML = '<tr><td colspan="5" style="text-align: center; opacity: 0.6; padding: 20px;">No flights recorded yet. Be the first!</td></tr>';
+              return;
+            }
+
+            boardBody.innerHTML = entries.map((e, index) => {
+              const rank = e.rank || (index + 1);
+              let rankBadge = `<span class="badge-rank">${rank}</span>`;
+              if (rank === 1) rankBadge = `<span class="badge-rank gold">1</span>`;
+              else if (rank === 2) rankBadge = `<span class="badge-rank silver">2</span>`;
+              else if (rank === 3) rankBadge = `<span class="badge-rank bronze">3</span>`;
+
+              const dist = e.stats?.distance ?? e.score ?? '-';
+              const parcels = e.stats?.parcels ?? '-';
+              const coins = e.stats?.coins ?? '-';
+              const isCurrent = profile && profile.id && e.player_id === profile.id;
+
+              return `
+                <tr class="${isCurrent ? 'highlight' : ''}">
+                  <td>${rankBadge}</td>
+                  <td><b>${e.name || 'Pilot'}</b></td>
+                  <td>${dist}m</td>
+                  <td>${parcels}</td>
+                  <td>${coins}</td>
+                </tr>
+              `;
+            }).join('');
+          } catch (err) {
+            boardBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #ff6b6b; padding: 20px;">Could not load leaderboard</td></tr>';
+          }
+        }
+
+        document.getElementById('btn-leaderboard').addEventListener('click', openLeaderboard);
+        document.getElementById('btn-modal-board').addEventListener('click', openLeaderboard);
+        document.getElementById('btn-close-leaderboard').addEventListener('click', () => {
+          boardModal.hidden = true;
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "leaderboard": {
+    "stats": [
+      { "key": "distance", "label": "Distance (m)", "order": "highest" },
+      { "key": "parcels", "label": "Parcels Delivered", "order": "highest" },
+      { "key": "coins", "label": "Coins Collected", "order": "highest" }
+    ]
+  }
+}
